@@ -136,7 +136,7 @@ system(str)
 
 if(paired == T){
   # read 1
-  str = paste0(seqkit_path, 'grep --pattern-file ', out_path, sample, '.kraken.microbiome.ids.txt ', out_path, sample, '_1.fq', ' > ', out_path, sample, '_1.fq-temp')
+  str = paste0(seqkit_path, ' grep --pattern-file ', out_path, sample, '.kraken.microbiome.ids.txt ', out_path, sample, '_1.fq', ' > ', out_path, sample, '_1.fq-temp')
   system(str)
   str = paste0(seqkit_path, ' fq2fa ', out_path, sample, '_1.fq-temp', ' > ', out_path, sample, '_1.fa')
   system(str)
