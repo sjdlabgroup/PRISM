@@ -1,0 +1,144 @@
+name,taxid,rank,n,pred
+Total,00,T,0,NA
+Homo sapiens,9606,S,0,NA
+cellular organisms,131567,R1,8867,NA
+Bacteria,2,D,8867,NA
+Terrabacteria group,1783272,D1,3486,NA
+FCB group,1783270,D1,1362,NA
+Bacteroidetes/Chlorobi group,68336,D2,1362,NA
+Proteobacteria,1224,P,2830,NA
+Firmicutes,1239,P,2678,NA
+Actinobacteria,201174,P,808,NA
+Bacteroidetes,976,P,1362,NA
+Fusobacteria,32066,P,1189,NA
+Gammaproteobacteria,1236,C,2799,NA
+Negativicutes,909932,C,1132,NA
+Coriobacteriia,84998,C,380,NA
+Tissierellia,1737404,C,442,NA
+Clostridia,186801,C,898,NA
+Bacteroidia,200643,C,1362,NA
+Actinomycetia,1760,C,428,NA
+Fusobacteriia,203490,C,1189,NA
+Bacilli,91061,C,206,NA
+Betaproteobacteria,28216,C,31,NA
+Enterobacterales,91347,O,2752,NA
+Veillonellales,1843489,O,1132,NA
+Coriobacteriales,84999,O,380,NA
+Tissierellales,1737405,O,442,NA
+Eubacteriales,186802,O,898,NA
+Bacteroidales,171549,O,1362,NA
+Propionibacteriales,85009,O,107,NA
+Fusobacteriales,203491,O,1189,NA
+Bifidobacteriales,85004,O,158,NA
+Lactobacillales,186826,O,195,NA
+Burkholderiales,80840,O,31,NA
+Micrococcales,85006,O,145,NA
+Corynebacteriales,85007,O,18,NA
+Moraxellales,2887326,O,24,NA
+Legionellales,118969,O,23,NA
+Bacillales,1385,O,11,NA
+Enterobacteriaceae,543,F,2100,NA
+Veillonellaceae,31977,F,1132,NA
+Coriobacteriaceae,84107,F,241,NA
+Yersiniaceae,1903411,F,652,NA
+Peptoniphilaceae,1570339,F,442,NA
+Clostridiaceae,31979,F,343,NA
+Prevotellaceae,171552,F,1334,NA
+Dysgonomonadaceae,2005520,F,24,NA
+Oscillospiraceae,216572,F,209,NA
+Propionibacteriaceae,31957,F,107,NA
+Fusobacteriaceae,203492,F,1189,NA
+Bifidobacteriaceae,31953,F,158,NA
+Lachnospiraceae,186803,F,346,NA
+Atopobiaceae,1643824,F,139,NA
+Lactobacillaceae,33958,F,165,NA
+Enterococcaceae,81852,F,30,NA
+Comamonadaceae,80864,F,31,NA
+Micrococcaceae,1268,F,145,NA
+Corynebacteriaceae,1653,F,18,NA
+Moraxellaceae,468,F,24,NA
+Legionellaceae,444,F,23,NA
+Staphylococcaceae,90964,F,11,NA
+Bacteroidaceae,815,F,4,NA
+Klebsiella/Raoultella group,2890311,F1,919,NA
+Klebsiella,570,G,919,NA
+Escherichia,561,G,1117,NA
+Dialister,39948,G,619,NA
+Collinsella,102106,G,241,NA
+Serratia,613,G,652,NA
+Parvimonas,543311,G,442,NA
+Clostridium,1485,G,77,NA
+Megasphaera,906,G,427,NA
+Prevotella,838,G,1334,NA
+Proteiniphilum,294702,G,24,NA
+Faecalibacterium,216851,G,146,NA
+Cutibacterium,1912216,G,107,NA
+Fusobacterium,848,G,1189,NA
+Bifidobacterium,1678,G,158,NA
+Blautia,572511,G,12,NA
+Lancefieldella,2767353,G,100,NA
+Mediterraneibacter,2316020,G,202,NA
+Lactiplantibacillus,2767842,G,165,NA
+Enterococcus,1350,G,30,NA
+Alkaliphilus,114627,G,266,NA
+Comamonas,283,G,31,NA
+Coprococcus,33042,G,130,NA
+Arthrobacter,1663,G,90,NA
+Olsenella,133925,G,39,NA
+Corynebacterium,1716,G,18,NA
+Salmonella,590,G,64,NA
+Rothia,32207,G,55,NA
+Veillonella,29465,G,86,NA
+Moraxella,475,G,24,NA
+Ruminococcus,1263,G,38,NA
+Legionella,445,G,23,NA
+Ethanoligenens,253238,G,25,NA
+Jeotgalicoccus,227979,G,11,NA
+Phocaeicola,909656,G,4,NA
+Roseburia,841,G,2,NA
+Klebsiella oxytoca,571,S,919,0.834908008575439
+Escherichia coli,562,S,1117,0.777336001396179
+Dialister pneumosintes,39950,S,619,0.336579144001007
+Collinsella aerofaciens,74426,S,241,0.344306766986847
+Serratia marcescens,615,S,652,0.93509578704834
+Parvimonas micra,33033,S,442,0.632400751113892
+Clostridium perfringens,1502,S,77,0.474509358406067
+Megasphaera stantonii,2144175,S,407,0.123587638139725
+Prevotella oris,28135,S,981,0.90465247631073
+Proteiniphilum saccharofermentans,1642647,S,24,0.00695522362366319
+Faecalibacterium prausnitzii,853,S,146,0.942531406879425
+Cutibacterium acnes,1747,S,107,0.197634547948837
+Fusobacterium nucleatum,851,S,1189,0.849639236927032
+Bifidobacterium longum,216816,S,106,0.919833064079285
+Blautia argi,1912897,S,12,0.563905298709869
+Lancefieldella parvula,1382,S,100,NA
+[Ruminococcus] torques,33039,S,116,NA
+Bifidobacterium thermophilum,33905,S,52,0.898025333881378
+Lactiplantibacillus plantarum,1590,S,165,0.0174891836941242
+Enterococcus cecorum,44008,S,30,0.948393821716309
+Alkaliphilus metalliredigens,208226,S,266,NA
+Comamonas aquatica,225991,S,31,0.268827319145203
+[Ruminococcus] gnavus,33038,S,86,0.0461625009775162
+Coprococcus catus,116085,S,130,0.0246384683996439
+Prevotella melaninogenica,28132,S,246,0.872998714447021
+Arthrobacter agilis,37921,S,90,0.268239080905914
+Prevotella nigrescens,28133,S,107,0.846915364265442
+Olsenella uli,133926,S,39,NA
+Corynebacterium liangguodongii,2079535,S,18,0.0199376754462719
+Salmonella enterica,28901,S,64,NA
+Rothia mucilaginosa,43675,S,55,0.496240258216858
+Veillonella parvula,29466,S,86,0.886957705020905
+Moraxella bovoculi,386891,S,24,0.709626495838165
+Ruminococcus champanellensis,1161942,S,10,0.0130338985472918
+Ruminococcus bovis,2564099,S,28,0.0148617569357157
+Legionella cherrii,28084,S,23,0.0176028814166784
+Ethanoligenens harbinense,253239,S,25,0.0313535183668137
+Megasphaera elsdenii,907,S,20,0.385015726089478
+Jeotgalicoccus saudimassiliensis,1461582,S,11,0.137417301535606
+Phocaeicola coprophilus,387090,S,4,0.00871048308908939
+Roseburia intestinalis,166486,S,2,0.0334119945764542
+Lancefieldella parvulum DSM 20469,521095,S1,100,0.100021883845329
+[Ruminococcus] torques L2-14,657313,S1,116,0.108229905366898
+Alkaliphilus metalliredigens QYMF,293826,S1,266,0.0355500690639019
+Olsenella uli DSM 7084,633147,S1,39,0.192053452134132
+Salmonella enterica subsp. enterica,59201,S1,64,0.412878423929214
