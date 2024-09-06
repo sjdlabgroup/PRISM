@@ -925,7 +925,7 @@ if(barcode_only == F){
 }
 
 # read 2
-if(paired == T & barcode_only == T){
+if(paired == T){
   str = paste0(
     'export BLASTDB=', blast_db_path, '; ', 
     blast_path, ' ', 
