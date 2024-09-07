@@ -888,13 +888,14 @@ if(length(headers) > 1000){
 ShortRead::writeFasta(fa1_new, file = paste0(out_path, sample, '-new_1.fa'))
 
 if(paired == T){    
-  headers2 = ShortRead::id(fq2)
+  fa2_new = subset(fq2, header_taxid %in% tx)
+  headers2 = ShortRead::id(fa2_new)
   # get read taxids
   if(length(headers2) > 1000){
     header_ids2 = list()
     i1 = seq(0, length(headers2), by = 1000)[-1] 
     i2 = i1 - 999  
-    if(max(i1) < length(fq2)){i2 = c(i2, max(i1)+1); i1=c(i1, length(fq2))}
+    if(max(i1) < length(fa2_new)){i2 = c(i2, max(i1)+1); i1=c(i1, length(fa2_new))}
     for(i in 1:length(i2)){
       # print(i)
       header_ids2[[i]] = str_remove(headers2[i2[i]:i1[i]], '\\s.*')
@@ -902,7 +903,6 @@ if(paired == T){
     header_ids2 = unlist(header_ids2)
   } else {header_ids2 = str_remove(headers2, '\\s.*')}
   
-  fa2_new = subset(fq2, header_ids2 %in% header_ids)
   ShortRead::writeFasta(fa2_new, file = paste0(out_path, sample, '-new_2.fa'))
 }
 
@@ -1160,7 +1160,7 @@ if(paired == T){
   str = paste0("awk 'NR==FNR { h[++i] = $0; next } /^>/ { print h[++j]; next } { print }' ", out_path_final, 'new_headers.txt ', 
                out_path, sample, '-new_2.fa > ', out_path_final, sample, '_2.fa')
   system(str)
-  str = paste0('rm ', out_path, sample, '_2.fa ', out_path, sample, '-new_2.fa')
+  str = paste0('rm ', out_path, sample, '_2.fa ', out_path, sample, '-new_2.fa ', out_path_final, 'new_headers.txt')
   system(str)
 }
 
