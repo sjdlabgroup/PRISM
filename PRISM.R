@@ -588,7 +588,7 @@ blast = blast %>%
 
 
 ## get products
-cat(paste('\nStarted microbial gene and product mapping at', Sys.time(), '\n'))
+cat(paste('Started microbial gene and product mapping at', Sys.time(), '\n'))
 
 # future::plan(multisession)
 uacc = unique(blast$sacc)
@@ -633,7 +633,7 @@ prod = dat; rm(dat)
 
 
 #### KMER PHYLOGENY ANALYSIS and PHYLOGENY MISCLASSIFICATION ANALYSIS
-cat(paste('\nStarted kmer phylogeny analysis at', Sys.time(), '\n'))
+cat(paste('Started kmer phylogeny analysis at', Sys.time(), '\n'))
 
 tx = unique(prod$taxid)
 out = list.files(out_path, full.names = T) %>% str_subset('output.txt')
@@ -1165,7 +1165,7 @@ if(paired == T){
 }
 
 
-cat(paste('\nFinished at', Sys.time(), '\n\n'))
+cat(paste('Finished at', Sys.time(), '\n\n'))
 
 
 
