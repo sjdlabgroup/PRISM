@@ -316,13 +316,12 @@ tx = intersect(tx, kr2$V7[str_detect(kr2$V6, 'S')])
 # read 1
 if(barcode_only == F){
   str = paste0(
-    'export BLASTDB=', blast_db_path, '; ', 
     blast_path, ' ', 
     '-max_hsps 1 ', 
     '-culling_limit 10 ', 
     '-max_target_seqs 10 ',
     '-query ',  out_path, sample, '_sub_fa1 ',
-    '-db nt ',
+    '-db ', blast_db_path, ' ', 
     '-outfmt "6 delim=, qseqid sacc staxids sstart pident bitscore sstrand" ',
     '-out  ', paste0(out_path, sample, '_sub_fa1-blast.csv '), 
     '-taxids ', paste0(c(9606, t, tx), collapse = ',') 
@@ -333,13 +332,12 @@ if(barcode_only == F){
 # read 2
 if(paired == T){
   str = paste0(
-    'export BLASTDB=', blast_db_path, '; ', 
     blast_path, ' ', 
     '-max_hsps 1 ', 
     '-culling_limit 10 ', 
     '-max_target_seqs 10 ',
     '-query ',  out_path, sample, '_sub_fa2 ',
-    '-db nt ',
+    '-db ', blast_db_path, ' ', 
     '-outfmt "6 delim=, qseqid sacc staxids sstart pident bitscore sstrand" ',
     '-out  ', paste0(out_path, sample, '_sub_fa2-blast.csv '), 
     '-taxids ', paste0(c(9606, t, tx), collapse = ',') 
@@ -909,13 +907,12 @@ if(paired == T){
 # read 1
 if(barcode_only == F){
   str = paste0(
-    'export BLASTDB=', blast_db_path, '; ', 
     blast_path, ' ', 
     '-max_hsps 1 ', 
     '-culling_limit 5 ', 
     '-max_target_seqs 5 ',
     '-query ',  out_path, sample, '-new_1.fa ',
-    '-db nt ',
+    '-db ', blast_db_path, ' ', 
     '-num_threads 12 ',
     '-outfmt "6 delim=, qseqid sacc staxids sstart pident bitscore sstrand qcovs" ',
     '-out  ', paste0(out_path, sample, '-final-blast.csv '), 
@@ -927,13 +924,12 @@ if(barcode_only == F){
 # read 2
 if(paired == T){
   str = paste0(
-    'export BLASTDB=', blast_db_path, '; ', 
     blast_path, ' ', 
     '-max_hsps 1 ', 
     '-culling_limit 5 ', 
     '-max_target_seqs 5 ',
     '-query ',  out_path, sample, '-new_2.fa ',
-    '-db nt ',
+    '-db ', blast_db_path, ' ', 
     '-num_threads 12 ',
     '-outfmt "6 delim=, qseqid sacc staxids sstart pident bitscore sstrand qcovs" ',
     '-out  ', paste0(out_path, sample, '-final-blast2.csv '), 
