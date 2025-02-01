@@ -42,6 +42,11 @@ PRISM requires the following dependencies:
 4.  BLAST:
     <https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/>
 5.  R packages: optparse, ShortRead, tidyverse, furrr, data.table, vegan
+6.  Processed genbank files:
+    <https://drive.google.com/file/d/1yj5gTTZpLPigHRp2Hvk2AmaM4UQHz-nn/view?usp=drive_link>
+
+After downloading this PRISM package and genbank folder, make sure to
+unzip the genbank folder and place it in the PRISM package directory.
 
 PRISM is a single command-line R function `PRISM.R`:
 
@@ -87,8 +92,8 @@ below.
 `X-results.csv`: This is the final BLAST result after determining the
 uniquely identifiable species and removing human, model organism, and
 vector sequences and resolving multi-mapping reads. It also contains the
-PRISM contamination score for each taxon. Each row corresponds to a
-sequencing read, with the columns as follows:
+PRISM score for each taxon. Each row corresponds to a sequencing read,
+with the columns as follows:
 
 - `id` Sequence ID
 - `staxids` NCBI taxon ID assigned
@@ -110,7 +115,7 @@ sequencing read, with the columns as follows:
 - `protein` Mapped protein ID
 - `cog` NCBI Database of Clusters of Orthologous Genes (COG)
 - `cat` NCBI COG category
-- `pred` PRISM contamination score (0=contaminant, 1=truly present)
+- `pred` PRISM score (0=contaminant, 1=truly present)
 
 `X-counts.csv`: This file gives a summary of the counts of each species
 and their contamination scores, as well as counts of all phylogenetic
@@ -156,13 +161,13 @@ Rscript \
 --paired F
 ```
 
-The file `D18-results.csv` can be used to so select a contamination
-score cutoff:
+The file `D18-results.csv` can be used to so select a PRISM score
+cutoff:
 
 ``` r
 library(tidyverse)
 
-res = read.csv('D18-results.csv') 
+res = read.csv('./test data/D18-results.csv') 
 head(res)
 ```
 
@@ -199,7 +204,7 @@ head(res)
 ggplot(res %>% subset(rank == 's') %>% distinct(tax_name, pred), aes(x=reorder(tax_name, -pred),y=pred)) + 
   geom_point() + 
   theme_classic() + 
-  ylab('Contamination Score') + 
+  ylab('PRISM Score') + 
   theme(axis.text.x = element_text(angle = 65, hjust=1),
         axis.text = element_text(color = 'black'), 
         axis.title.x = element_blank())
@@ -208,9 +213,9 @@ ggplot(res %>% subset(rank == 's') %>% distinct(tax_name, pred), aes(x=reorder(t
 <img src="README_files/figure-gfm/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
 
 Users may wish to filter taxa for a minimum read count, query coverage
-percentage (qcovs), and contamination score (pred). Here is one way to
-filter for species with \>100 reads, contamination score \> 0.2, and
-reads with qcovs \> 0.8:
+percentage (qcovs), and PRISM score (pred). Here is one way to filter
+for species with \>100 reads, contamination score \> 0.2, and reads with
+qcovs \> 0.8:
 
 ``` r
 res %>% 
@@ -257,7 +262,7 @@ position (pos). This can be useful for verifying read alignments or
 identifying barcodes and UMIs in single cell data.
 
 ``` bash
-head -n 12 D18_1.fa
+head -n 12 "./test data/D18_1.fa"
 ```
 
     ## >A01415:265:HMMMFDRXY:1:2134:22363:20055 1:N:0:TCAGCCTT+CTGTATGC | PRISM | staxids:851 sacc:AJ810276 pos:349
@@ -275,4 +280,7 @@ head -n 12 D18_1.fa
 
 ## Reference
 
-Coming soon.
+Ghaddar B, Blaser M, De S. Revisiting the cancer microbiome using PRISM.
+bioRxiv 2025
+
+<https://www.biorxiv.org/content/10.1101/2025.01.21.634087v1>
