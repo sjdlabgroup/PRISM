@@ -1,7 +1,7 @@
 PRISM: PRecise Identification of Species of the Microbiome
 ================
 Bassel Ghaddar
-2024-09-04
+2025-10-15
 
 ## Introduction
 
@@ -24,259 +24,222 @@ representative subsample of sequencing reads and taxa first identified
 with fast, k-mer-based taxonomic classification. It then employs a
 machine learning model to predict tissue-present microbes
 vs. contaminants based on multiple features engineered from read mapping
-and gene expression statistics (Fig. 1). PRISM works on any genomic
-sequencing type (e.g. RNA, DNA, 16S, scRNA-seq, etc.).
+and gene expression statistics (Fig. 1). PRISM is compatible with
+RNA-seq, WGS, 16S-seq, and scRNA-seq.
 
 Please see the reference below for more information.
 
 Please contact Bassel Ghaddar (<bassel.ghaddar@gmail.com>) for any
 questions.
 
-## Running PRISM
+## Setup
 
 PRISM requires the following dependencies:
 
 1.  Kraken2: <https://github.com/DerrickWood/kraken2>
-2.  Seqkit: <https://bioinf.shenwei.me/seqkit/>
+2.  Minimap2:<https://github.com/lh3/minimap2>
 3.  STAR: <https://github.com/alexdobin/STAR>
 4.  BLAST:
     <https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/>
-5.  R packages: optparse, ShortRead, tidyverse, furrr, data.table, vegan
-6.  Processed genbank files:
+5.  Seqkit: <https://bioinf.shenwei.me/seqkit/>
+6.  R packages: optparse, ShortRead, tidyverse, furrr, data.table, vegan
+7.  Processed genbank files:
     <https://drive.google.com/file/d/1yj5gTTZpLPigHRp2Hvk2AmaM4UQHz-nn/view?usp=drive_link>
 
 After downloading this PRISM package and genbank folder, make sure to
 unzip the genbank folder and place it in the PRISM package directory.
 
-PRISM is a single command-line R function `PRISM.R`:
+There is a required BLAST database mapping file that must be created
+once:
+
+One-time setup: create accession→taxid map for PRISM
+
+1.  Extract taxid-accession pairs from your BLAST database (edit path as
+    needed)
+    `blastdbcmd -db /path/to/blast/db/eg/core_nt \   -entry all -outfmt "%T %a" > /path/to/PRISM/taxid_accession_map.tsv`
+
+2.  Sort by taxid to create final map
+    `sort -k1,1 /path/to/PRISM/taxid_accession_map.tsv > /path/to/PRISM/sorted_accession_map.txt`
+
+(Re-run only if BLAST database is updated)
+
+PRISM is invoked with a single command-line R function `PRISM.R`:
+
+## Running PRISM
 
 ### Input
 
 `PRISM.R`
 
-- `--sample` sample name (excluding file extension; e.g. the sample name
-  for ABC_1.fastq is “ABC”)
-- `--data_path` path to fastq file(s)
+#### Required inputs / flags
+
+- `--sample` sample name (e.g., ABC for ABC_1.fastq)
+- `--data_path` path to FASTQ/FASTA files
 - `--kraken_path` path to Kraken2 executable
-- `--kraken_db_path` path to Kraken2 reference database
-- `--seqkit_path` path to SeqKit
-- `--star_path` path to STAR
-- `--star_genome_dir` path to STAR human genome index (for –genomeDir
-  parameter)
-- `--blast_path` path to blastn
-- `--blast_db_path` path to BLAST reference database
-- `--prism_path` path to PRISM repository
-- `--paired` whether fastq files are paired (T) or unpaired (F); default
-  is (T)
-- `--fq1_end` ending of fastq file 1 (e.g. for ABC_1.fastq it would be
-  “\_1.fastq”)
-- `--fq2_end` ending of fastq file 2 (if applicable; e.g. for ABC.fa2 it
-  would be “.fa2”)
-- `--barcode_only` whether fastq file 1 contains only a single-cell
-  barcode (T) or a sequence (F); Default = F
-- `--max_sample` maximum number of reads per taxon to sample for the
-  initial BLAST step; Default = 1000
-- `--min_read_per` minimum reads for a taxon per X to analyze. Default
-  is 1 per 10,000 (min_read_per=10^4)
-- `--min_uniq_frac` minimum ratio of number ofunique k-mers to Kraken
-  reads for a taxon. Default = 5
-- `model_org_taxids` path to .txt file with model organism taxids;
-  default file includes Mus and Rodentia species
+- `--kraken_db_path` path to Kraken2 database
+- `--seqkit_path` path to SeqKit executable
+- `--minimap2_path` path to Minimap2 executable
+- `--minimap2_index` path to Minimap2 host .mmi index
+- `--star_path` path to STAR executable
+- `--star_genome_dir` path to STAR host genome index (for –genomeDir)
+- `--blast_path` path to BLAST+ executables directory
+- `--blast_db_path` path prefix to BLAST database (no extension)
+- `--prism_path` path to PRISM repository (root folder)
 
-### Output
+#### Common / optional flags (defaults shown)
 
-PRISM creates a directory for sample `X` called `~/X_prism` and outputs
-3 key files: `X-results.csv`, `X-counts.csv`, and `X.fa`, described
-below.
+- `--model_org_taxids` path to text file of model-organism taxids
+  (default: prism_path/NA → bundled file)
+- `--paired` TRUE\|FALSE (default TRUE)
+- `--fq1_end` suffix for read1 (default “\_1.fastq”)
+- `--fq2_end` suffix for read2 (default “\_2.fastq”)
+- `--barcode_only` TRUE\|FALSE; if TRUE, skip BLAST of read1 (default
+  FALSE)
+- `--max_sample` maximum reads per taxon in subsample (default 100)
+- `--min_read_per` minimum reads per X to analyze (default 1e4)
+- `--min_uniq_frac` minimum unique k-mer ratio (default 5)
+- `--threads` number of threads for external tools (default 1)
+- `--min_qcovs` minimum BLAST query coverage percent (default 80)
+- `--out_path` output directory (default: {data_path}/{sample}\_prism/)
+- `--use_custom_db` TRUE\|FALSE; build temporary subsetted BLAST DB
+  (default TRUE)
+- `--custom_db_path` directory for temporary subsetted BLAST DB
+  (default: {out_path}/data/customdb)
+- `--fasta_size_threshold_custom_db` minimum FASTA size (MB) to trigger
+  custom DB (default 5)
 
-`X-results.csv`: This is the final BLAST result after determining the
-uniquely identifiable species and removing human, model organism, and
-vector sequences and resolving multi-mapping reads. It also contains the
-PRISM score for each taxon. Each row corresponds to a sequencing read,
-with the columns as follows:
+## Output
 
-- `id` Sequence ID
-- `staxids` NCBI taxon ID assigned
-- `rank` Highest resolution phylogenetic rank (k,p,c,o,f,g,s) for read
-- `tax_name` Taxon scientific name
-- `read` Whether assignment is from read 1 or 2 (for paired reads)
-- `pos` BLAST accession mapping position
-- `ppos` BLAST percentage of positive scoring matches
-- `bitscore` BLAST Bit score
-- `strand` BLAST subject strand
-- `qcovs` BLAST query coverage per subject
-- `sacc` BLAST subject accession
-- `definition` BLAST accession name
-- `version` BLAST accession version
-- `gene` Genbank gene of mapped sequence
-- `start` Mapping start position
-- `end` Mapping end position
-- `product` Genbank product of mapped sequence
-- `protein` Mapped protein ID
-- `cog` NCBI Database of Clusters of Orthologous Genes (COG)
-- `cat` NCBI COG category
-- `pred` PRISM score (0=contaminant, 1=truly present)
+PRISM creates a directory for each sample containing the main subfolder
+`data/` with all intermediate files and logs.  
+The key final outputs are:
 
-`X-counts.csv`: This file gives a summary of the counts of each species
-and their contamination scores, as well as counts of all phylogenetic
-levels. This is only intended as an initial summary, as the counts will
-change if the user filters the `X-results.csv` file by the contamination
-score and/or read query coverage (see example analysis below). The
-columns in this file are:
+- **`X-results.csv`** — Final per-read table after all filtering and
+  scoring  
+- **`X-counts.csv`** — Per-species summary of detected taxa  
+- **`X_1.fa` / `X_2.fa`** — Final PRISM FASTA(s) of retained microbial
+  reads (headers annotated with taxid and accession)
 
-- `name` Taxon name
-- `taxid` NCBI taxon ID
-- `rank` Taxon rank
-- `n` Taxon read counts
-- `pred` Taxon contamination score (only for species; 0=contaminant,
-  1=truly present)
+#### `X-results.csv`
 
-`X_1.fa/X_2.fa`: PRISM outputs fasta files of the identified microbial
-reads.
+This is the final BLAST alignment table after: 1. Identifying uniquely
+mappable microbial species, 2. Removing human, model organism, and
+vector sequences, 3. Resolving multi-mapping reads, and 4. Appending
+GenBank annotations and PRISM classification scores.
 
-`~/X_prism/data` contains all intermediate files produced by PRISM,
-including files from Kraken2 and STAR
+Each row corresponds to a single sequencing read.  
+Columns:
 
-## Example on 16S metagenomics data from pancreatic cancer
+| Column | Description |
+|:---|:---|
+| **id** | Sequence identifier |
+| **read** | Read number (`1` or `2`) for paired-end samples |
+| **staxids** | NCBI taxon ID assigned |
+| **tax_name** | Scientific name of the taxon |
+| **rank** | Highest resolved phylogenetic rank (`k,p,c,o,f,g,s`) |
+| **sacc** | BLAST subject accession |
+| **pos** | Subject start position of alignment |
+| **qcovs** | BLAST query coverage percent (0–100) |
+| **pident** | Percent sequence identity |
+| **bitscore** | BLAST bit score |
+| **gene** | GenBank gene annotation (if available) |
+| **product** | GenBank product annotation (if available) |
+| **pred** | PRISM score (0 = likely contaminant, 1 = likely truly present) |
 
-We use PRISM to analyze pancreatic tumor sample D18 from Ghaddar et al,
-Cancer Cell 2022. A subsampled fasta file `D18.fa` is included in this
-repository.
+#### `X-counts.csv`
+
+Aggregated species-level summary of reads and PRISM scores:
+
+| Column       | Description                |
+|:-------------|:---------------------------|
+| **tax_name** | Scientific name            |
+| **staxids**  | NCBI taxon ID              |
+| **n**        | Number of reads assigned   |
+| **pred**     | Mean PRISM score per taxon |
+
+#### `X_1.fa` / `X_2.fa`
+
+Final FASTA files containing only PRISM-retained reads.  
+Each header is annotated as: read_id \| PRISM \| staxids:{taxid}
+sacc:{accession}
+
+## Example
+
+#### RNA-seq data from pancreatic cancer, using f942e6d6-f697-4141-8f1c-58933ca81751_1.fastq and f942e6d6-f697-4141-8f1c-58933ca81751_2.fastq from the CPTAC project.
 
 ``` bash
 Rscript \
 /path/to/PRISM/PRISM.R \
---sample D18 \
---data_path /path/to/fasta/ \
+--sample f942e6d6-f697-4141-8f1c-58933ca81751 \
+--data_path /path/to/data/ \
 --kraken_path /path/to/kraken2-master/kraken2 \
 --kraken_db_path /path/to/kraken_db \
 --seqkit_path /path/to/seqkit \
---star_path /path/to/STAR-2.7.11b/bin/Linux_x86_64_static/STAR \
+--minimap2_path /path/to/minimap2 \
+--minimap2_index /path/to/host_hg38.mmi \
+--star_path /path/to/STAR \
 --star_genome_dir /path/to/star_index \
 --model_org_taxids /path/to/PRISM/model_org_taxids.txt \
---blast_path  /path/to/blast/2.16/bin/blastn \
---blast_db_path /path/to/BLAST/NT_db/ \
+--blast_path /path/to/blast/2.16/bin/ \
+--blast_db_path /path/to/BLAST/db \
 --prism_path /path/to/PRISM/ \
---fq1_end .fa \
---paired F
+--fq1_end _1.fastq \
+--fq2_end _2.fastq \
+--paired T
 ```
 
-The file `D18-results.csv` can be used to so select a PRISM score
-cutoff:
+The files `0ac20066-3954-4a36-8ab3-c62a0c32d988-results.csv` and
+`0ac20066-3954-4a36-8ab3-c62a0c32d988-counts.csv` contain the main
+results.
+
+Species counts and PRISM scores:
 
 ``` r
 library(tidyverse)
-
-res = read.csv('./test data/D18-results.csv') 
-head(res)
+res = read.csv('./test data/0ac20066-3954-4a36-8ab3-c62a0c32d988-counts.csv') 
+tibble(res)
 ```
 
-    ##                                        id staxids rank                tax_name
-    ## 1 A01415:265:HMMMFDRXY:1:2101:10276:13213     571    s      Klebsiella oxytoca
-    ## 2 A01415:265:HMMMFDRXY:1:2101:12671:25911     562    s        Escherichia coli
-    ## 3 A01415:265:HMMMFDRXY:1:2101:13141:11224   39950    s  Dialister pneumosintes
-    ## 4  A01415:265:HMMMFDRXY:1:2101:13792:3270   74426    s Collinsella aerofaciens
-    ## 5   A01415:265:HMMMFDRXY:1:2101:1398:6386     615    s     Serratia marcescens
-    ## 6 A01415:265:HMMMFDRXY:1:2101:14995:16157   33033    s        Parvimonas micra
-    ##   read pos    ppos bitscore strand qcovs     sacc
-    ## 1    1 329 100.000      420   plus   100 AJ871858
-    ## 2    1 317 100.000      420   plus   100         
-    ## 3    1 374  99.559      414   plus   100 HM596297
-    ## 4    1 320  94.787      329   plus    93 AJ245920
-    ## 5    1 313 100.000      420   plus   100 AJ296308
-    ## 6    1 344  99.559      414   plus   100 AM176533
-    ##                                                           definition    version
-    ## 1        Klebsiella oxytoca partial 16S rRNA gene type strain SB175T AJ871858.1
-    ## 2                                                                              
-    ## 3 Dialister pneumosintes strain F0409 16S ribosomal RNA gene partial HM596297.1
-    ## 4          Collinsella aerofaciens partial 16S rRNA gene strain H818 AJ245920.1
-    ## 5                  Serratia marcescens 16S rRNA gene isolate CPO14CU AJ296308.1
-    ## 6            Micromonas micros partial 16S rRNA gene isolate gpac135 AM176533.1
-    ##       gene start  end           product protein cog cat      pred
-    ## 1 16S rRNA     1 1454 16S ribosomal RNA          NA  NA 0.8349080
-    ## 2             NA   NA                            NA  NA 0.7773360
-    ## 3              1 1547 16S ribosomal RNA          NA  NA 0.3365791
-    ## 4 16S rRNA     1 1417 16S ribosomal RNA          NA  NA 0.3443068
-    ## 5 16S rRNA     1 1408 16S ribosomal RNA          NA  NA 0.9350958
-    ## 6 16S rRNA     1 1447 16S ribosomal RNA          NA  NA 0.6324008
+    ## # A tibble: 13 × 4
+    ##    tax_name                staxids     n  pred
+    ##    <chr>                     <int> <int> <dbl>
+    ##  1 Enterococcus faecium       1352  5521 0.973
+    ##  2 Escherichia coli            562  1531 0.105
+    ##  3 Pseudomonas aeruginosa      287   277 0.009
+    ##  4 Staphylococcus aureus      1280   262 0.005
+    ##  5 Bacteroides fragilis        817   228 0.617
+    ##  6 Cupriavidus taiwanensis  164546   199 0.002
+    ##  7 Paucibacter sediminis   3019553   175 0    
+    ##  8 Pseudomonas tolaasii      29442   161 0.002
+    ##  9 Cutibacterium acnes        1747   120 0.006
+    ## 10 Pseudomonas yamanorum    515393    99 0.004
+    ## 11 Parvimonas micra          33033    43 0.006
+    ## 12 Prevotella nigrescens     28133    43 0.002
+    ## 13 Malassezia restricta      76775    24 0.001
+
+Examining read-level microbial gene/product data:
 
 ``` r
-ggplot(res %>% subset(rank == 's') %>% distinct(tax_name, pred), aes(x=reorder(tax_name, -pred),y=pred)) + 
-  geom_point() + 
-  theme_classic() + 
-  ylab('PRISM Score') + 
-  theme(axis.text.x = element_text(angle = 65, hjust=1),
-        axis.text = element_text(color = 'black'), 
-        axis.title.x = element_blank())
+library(tidyverse)
+res = read.csv('./test data/0ac20066-3954-4a36-8ab3-c62a0c32d988-results.csv') 
+tibble(res)
 ```
 
-<img src="README_files/figure-gfm/unnamed-chunk-2-1.png" style="display: block; margin: auto;" />
-
-Users may wish to filter taxa for a minimum read count, query coverage
-percentage (qcovs), and PRISM score (pred). Here is one way to filter
-for species with \>100 reads, contamination score \> 0.2, and reads with
-qcovs \> 0.8:
-
-``` r
-res %>% 
-  subset(rank == 's' & qcovs > 0.8 & pred > 0.2) %>% 
-  group_by(tax_name, staxids, pred) %>% 
-  summarize(n = n(), .groups = 'drop') %>%
-  subset(n > 100) 
-```
-
-    ## # A tibble: 11 × 4
-    ##    tax_name                     staxids  pred     n
-    ##    <chr>                          <int> <dbl> <int>
-    ##  1 Bifidobacterium longum        216816 0.920   106
-    ##  2 Collinsella aerofaciens        74426 0.344   241
-    ##  3 Dialister pneumosintes         39950 0.337   619
-    ##  4 Escherichia coli                 562 0.777  1112
-    ##  5 Faecalibacterium prausnitzii     853 0.943   135
-    ##  6 Fusobacterium nucleatum          851 0.850  1189
-    ##  7 Klebsiella oxytoca               571 0.835   877
-    ##  8 Parvimonas micra               33033 0.632   442
-    ##  9 Prevotella melaninogenica      28132 0.873   190
-    ## 10 Prevotella oris                28135 0.905   981
-    ## 11 Serratia marcescens              615 0.935   647
-
-Users can also examine the microbial genes and products mapped and their
-corresponding NCBI gene ortholog categories. The example data is from
-16S gene sequencing, and that is what PRISM finds:
-
-``` r
-table(subset(res, product != '')$product) %>% sort() 
-```
-
-    ## 
-    ## FadR family transcriptional regulator GntR family transcriptional regulator 
-    ##                                     1                                     1 
-    ##                              tRNA-Ser                       MFS transporter 
-    ##                                     2                                    10 
-    ##                     16S ribosomal RNA 
-    ##                                  7688
-
-PRISM also outputs a FASTA file annotated microbial reads annotated with
-PRISM’s identified taxid, BLAST mapping accession (sacc) and mapping
-position (pos). This can be useful for verifying read alignments or
-identifying barcodes and UMIs in single cell data.
-
-``` bash
-head -n 12 "./test data/D18_1.fa"
-```
-
-    ## >A01415:265:HMMMFDRXY:1:2134:22363:20055 1:N:0:TCAGCCTT+CTGTATGC | PRISM | staxids:851 sacc:AJ810276 pos:349
-    ## TGGGGAATATTGGACAATGGACCAAGAGTCTGATCCAGCAATTCTGTGTGCACGATGAAGTTTTTCGGAATGTAAAGTGC
-    ## TTTCAGTTGGGAAGAAAGAAATGACGGTACCAACAGAAGAAGTGACGGCTAAATACGTGCCAGCAGCCGCGGTAATACGT
-    ## ATGTCACGAGCGTTATCCGGATTTATTGGGCGTAAAGCGCGTCTAGGTGGTTATATAAGTATGATGT
-    ## >A01415:265:HMMMFDRXY:1:2127:16767:5384 1:N:0:TCAGCCTT+CTGTATGC | PRISM | staxids:851 sacc:AJ810275 pos:349
-    ## TGGGGAATATTGGACAATGGACCAAGAGTCTGATCCAGCAATTCTGTGTGCACGATGAAGTTTTTCGGAATGTAAAGTGC
-    ## TTTCAGTTGGGAAGAAATAAATGACGGTACCAACAGAAGAAGTGACGGCTAAATACGTGCCAGCAGCCGCGGTAATACGT
-    ## ATGTCACGAGCGTTATCCGGATTTATTGGGCGTAAAGCGCGTCTAGGTGGTTATGTAAGTCTGATGT
-    ## >A01415:265:HMMMFDRXY:1:2267:9462:15092 1:N:0:TCAGCCTT+CTGTATGC | PRISM | staxids:28135 sacc:JN867292 pos:347
-    ## TGAGGAATATTGGTCAATGGGCGAGAGCCTGAACCAGCCAAGTAGCGTGCAGGAAGACGGCCCTATGGGTTGTAAACTGC
-    ## TTTTATGCGGGGATAAAGTGAGGGACGTGTCCTTCATTGCAGGTACCGCATGAATAAGGACCGGCTAATTCCGTGCCAGC
-    ## AGCCGCGGTAATACGGAAGGTCCTGGCGTTATCCGGATTTATTGGGTTTAAAGGGAGCGTAGGCCGT
+    ## # A tibble: 8,683 × 13
+    ##    id        read staxids tax_name rank  sacc  gene  product    pos qcovs pident
+    ##    <chr>    <int>   <int> <chr>    <chr> <chr> <chr> <chr>    <int> <int>  <dbl>
+    ##  1 K00270:…     2     562 Escheri… S     S429… ""    ""         105   100  100  
+    ##  2 K00270:…     2    1352 Enteroc… S     MK33… ""    "16S r…    624   100  100  
+    ##  3 K00270:…     1    1352 Enteroc… S     LC56… ""    ""         124    99   90.8
+    ##  4 K00270:…     1    1352 Enteroc… S     LC56… ""    ""         124   100   92.2
+    ##  5 K00270:…     1    1352 Enteroc… S     CP13… ""    ""         263    99  100  
+    ##  6 K00270:…     1 3019553 Pauciba… S     CP11… ""    "23S r… 899421   100  100  
+    ##  7 K00270:…     2     562 Escheri… S     AP02… ""    "23S r… 457497   100  100  
+    ##  8 K00270:…     1 3019553 Pauciba… S     CP11… ""    "23S r… 899421   100  100  
+    ##  9 K00270:…     2     562 Escheri… S     CP09… ""    "23S r… 468371   100  100  
+    ## 10 K00270:…     1    1352 Enteroc… S     LC56… ""    ""         124   100   89.6
+    ## # ℹ 8,673 more rows
+    ## # ℹ 2 more variables: bitscore <dbl>, pred <dbl>
 
 ## Reference
 

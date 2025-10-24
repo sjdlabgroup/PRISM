@@ -1,0 +1,14 @@
+tax_name,staxids,n,pred
+Enterococcus faecium,1352,5521,0.973
+Escherichia coli,562,1531,0.105
+Pseudomonas aeruginosa,287,277,0.009
+Staphylococcus aureus,1280,262,0.005
+Bacteroides fragilis,817,228,0.617
+Cupriavidus taiwanensis,164546,199,0.002
+Paucibacter sediminis,3019553,175,0.000
+Pseudomonas tolaasii,29442,161,0.002
+Cutibacterium acnes,1747,120,0.006
+Pseudomonas yamanorum,515393,99,0.004
+Parvimonas micra,33033,43,0.006
+Prevotella nigrescens,28133,43,0.002
+Malassezia restricta,76775,24,0.001
