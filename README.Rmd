@@ -31,7 +31,7 @@ PRISM requires the following dependencies:
 4. BLAST: https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/LATEST/
 5. Seqkit: https://bioinf.shenwei.me/seqkit/
 6. R packages: optparse, ShortRead, tidyverse, furrr, data.table, vegan
-7. Processed genbank files: https://drive.google.com/file/d/1yj5gTTZpLPigHRp2Hvk2AmaM4UQHz-nn/view?usp=drive_link
+7. Processed genbank files: https://drive.google.com/file/d/1nkdQ3GyG_FfQQI7nRWpzcQDJOTvULuGV/view?usp=sharing
 
 After downloading this PRISM package and genbank folder, make sure to unzip the genbank folder and place it in the PRISM package directory. 
 
