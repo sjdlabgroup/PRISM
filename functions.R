@@ -333,6 +333,20 @@ prism_minimap = function(sample,
   
   
   #---- 5) extract unmapped reads and rewrite FASTA(s) ----
+  
+  has_records <- system(
+    paste("grep -qv '^@' ", shQuote(out_sam)),
+    ignore.stdout = TRUE,
+    ignore.stderr = TRUE
+  ) == 0
+  
+  if (!has_records) {
+    message("No human reads detected by Minimap2")
+    fa1 <- ShortRead::readFasta(fasta1)
+    fa2 <- if (paired) ShortRead::readFasta(fasta2) else NULL
+    return(list(fa1 = fa1, fa2 = fa2))
+  }
+  
   # 1) read the SAM and grab query IDs where the 0x4 (unmapped) bit is set
   sam_df <- tryCatch(
     suppressWarnings(
@@ -1067,6 +1081,14 @@ prism_filter <- function(out_path, sample, kr_report, mpa, paired, blast_file_pa
 prism_multimapping = function(out_path, sample, kr_report, mpa, paired, blast_file_pattern, nreads=10, min_qcovs){
   
   #— 1) Filter out non-microbial reads from Blast results (human and model organism) ————————————————
+  
+  blast_files <- list.files(out_path, pattern = blast_file_pattern, full.names = TRUE)
+  
+  if (length(blast_files) == 0 || all(file.info(blast_files)$size == 0)) {
+    message("No subsample BLAST hits found; no uniquely identifiable microbial species.")
+    return(character(0))
+  }
+  
   out = prism_filter(out_path, sample, kr_report, mpa, paired, blast_file_pattern, min_qcovs)
   blast = out$micro
   

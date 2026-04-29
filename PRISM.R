@@ -173,6 +173,15 @@ if (!file.exists(file.path(out_path, paste0(sample, "-final-blast1.csv")))) {
       prism_multimapping(out_path, sample, kr_report, mpa, paired, 
                          blast_file_pattern = "-blast.csv", nreads = 10, min_qcovs)
     ))
+    
+    if (length(uit) == 0) {
+      log_message("No uniquely identifiable microbial species found. Writing empty outputs and stopping gracefully.")
+      
+      fwrite(data.table(), file = paste0(file.path(out_path_final, sample), "-results.csv"))
+      fwrite(data.table(), file = paste0(file.path(out_path_final, sample), "-counts.csv"))
+      
+      quit(save = "no", status = 0)
+    }
   }
 }
 
